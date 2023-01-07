@@ -28,6 +28,53 @@ public class Compressor {
             return ans;
         }
 
+        public static PriorityQueue<HuffmanNode> generateMinHeap(HashMap<Byte, Integer> freqMap){
+
+            PriorityQueue<HuffmanNode> minHeap = new PriorityQueue<HuffmanNode>(freqMap.size(), new comp());
+        
+        
+            for (Map.Entry<Byte,Integer> element : freqMap.entrySet()) {
+
+                Byte ch= element.getKey();
+                int chFreq = element.getValue();
+
+                // creating a Huffman node object and adding it to the priority queue
+                 HuffmanNode node = new HuffmanNode();
+
+                node.ch = ch;
+                node.freq = chFreq;
+
+                node.left = null;
+                node.right = null;
+
+                //adding node to queue
+                minHeap.add(node);
+            }
+
+            return minHeap;
+
+        }
+
+        public static HashMap<Byte, Integer> countFreq(byte[] orgFileList){
+            HashMap<Byte, Integer> freqMap = new HashMap<Byte, Integer>();
+
+
+  
+            //storing frequency of each char in hashmap
+            for(byte currChar:orgFileList){
+ 
+                if(freqMap.containsKey(currChar)){
+                    freqMap.put(currChar, freqMap.get(currChar)+1);
+                }
+                else{
+                    freqMap.put(currChar,1);
+                }
+
+            }
+
+            return freqMap;
+        }
+
 
         //function to generate huffman codes for each unique character and storing them in a hashmap(huffmanMap)
         public static void generateCode(HuffmanNode root, String str, HashMap<Byte, String> huffmanMap)
@@ -245,54 +292,27 @@ public class Compressor {
 
         public static void main (String args[]) throws FileNotFoundException,IOException{
     
-            
-            FileInputStream orgFileReader = new FileInputStream("OriginalTextFile.txt");
+            String orgFileName=args[0];
+            FileInputStream orgFileReader = new FileInputStream(orgFileName);
 
-            //Hashmap for storing frequencies of each unique character of original file
-            HashMap<Byte, Integer> freqMap = new HashMap<Byte, Integer>();
+            
+
+            
 
             byte[] orgFileList = new byte[orgFileReader.available()];
 
             //reading data from original file in byte array
             orgFileReader.read(orgFileList);
 
-  
-            //storing frequency of each char in hashmap
-            for(byte currChar:orgFileList){
- 
-                if(freqMap.containsKey(currChar)){
-                    freqMap.put(currChar, freqMap.get(currChar)+1);
-                }
-                else{
-                    freqMap.put(currChar,1);
-                }
+            //Hashmap for storing frequencies of each unique character of original file
+            HashMap<Byte, Integer> freqMap = countFreq(orgFileList);
 
-            }
 
-                  
 
             //generating a min-heap using priority queue 
+            PriorityQueue<HuffmanNode> minHeap = generateMinHeap(freqMap);
 
-            PriorityQueue<HuffmanNode> minHeap = new PriorityQueue<HuffmanNode>(freqMap.size(), new comp());
-        
-        
-            for (Map.Entry<Byte,Integer> element : freqMap.entrySet()) {
-
-                Byte ch= element.getKey();
-                int chFreq = element.getValue();
-
-                // creating a Huffman node object and adding it to the priority queue
-                 HuffmanNode node = new HuffmanNode();
-
-                node.ch = ch;
-                node.freq = chFreq;
-
-                node.left = null;
-                node.right = null;
-
-                //adding node to queue
-                minHeap.add(node);
-            }
+            
 
 
             //----Creating huffmann tree using min heap
@@ -305,12 +325,13 @@ public class Compressor {
             HashMap<Byte, String> huffmanMap = new HashMap<Byte, String>();
 
             //generating huffmann code for each character by tree traversal
-            generateCode(root, "", huffmanMap);
+            generateCode(root, "",huffmanMap);
 
            
             Boolean isCompExist=false;
 
-            File CompressedFile = new File("CompressedTextFile.txt");
+            String compFileName="compressed-"+orgFileName;
+            File CompressedFile = new File(compFileName);
 
             if (CompressedFile.createNewFile()) {
                  System.out.println("File created: " + CompressedFile.getName());
@@ -322,7 +343,7 @@ public class Compressor {
 
         
             if(!isCompExist)
-                encodeOrgFile(orgFileList,"CompressedTextFile.txt" , huffmanMap,root);
+                encodeOrgFile(orgFileList,compFileName , huffmanMap,root);
   
 
             orgFileReader.close();
@@ -330,7 +351,7 @@ public class Compressor {
     
 }
 
-class HuffmanNode {
+ class HuffmanNode {
     int freq;
     byte ch;
  
@@ -345,3 +366,4 @@ class comp implements Comparator<HuffmanNode> {
         return n1.freq - n2.freq;
     }
 }
+
