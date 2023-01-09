@@ -1,4 +1,4 @@
-package Decompressor;
+package decompressor;
 import java.io.*;
 
 public interface IDecompressor {

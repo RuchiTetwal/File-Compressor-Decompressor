@@ -1,4 +1,4 @@
-package Compressor;
+package compressor;
 import java.io.*;
 
 public interface Icompressor {
