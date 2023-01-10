@@ -20,7 +20,7 @@ public class HuffmanDecompressorImpl implements IDecompressor {
             byte bitsInLastByteCompFile = helper.getBitsInLastByteCompFile(compFileArr);
             byte[] header = helper.getHeader(compFileArr, headerSize);
             Node root = helper.generateHuffmanTree(header, headerSize);
-            helper.getCharFromTreeWriteInDecompFile(decompFileWriter, root, compFileArr, bitsInLastByteCompFile);
+            helper.getCharFromTreeWriteInDecompFile(decompFileWriter, root, compFileArr, bitsInLastByteCompFile,headerSize);
             helper.compareOrgDecompFiles(orgFileName, decompFileName);
 
         }

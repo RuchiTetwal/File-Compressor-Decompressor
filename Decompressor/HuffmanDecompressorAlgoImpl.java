@@ -10,8 +10,6 @@ public class HuffmanDecompressorAlgoImpl implements IHuffmanDecompressorAlgo {
 
     Logger logger = Logger.getLogger(HuffmanDecompressorAlgoImpl.class.getName());
 
-    private int compFileIterator = 0;
-
     // function to convert byte array to int
     private int bytesToInt(byte[] bytes) {
         int ans = 0;
@@ -23,6 +21,7 @@ public class HuffmanDecompressorAlgoImpl implements IHuffmanDecompressorAlgo {
 
     @Override
     public int getHeaderSize(byte[] compFileArr) {
+        int compFileIterator=0; //0-3 bytes 
         byte[] headerSizeBytes = new byte[4];
         for (int i = 0; i < 4; i++) {
             headerSizeBytes[i] = compFileArr[compFileIterator++];
@@ -33,13 +32,14 @@ public class HuffmanDecompressorAlgoImpl implements IHuffmanDecompressorAlgo {
     // Getting number of relevant bits in last byte of compressed file
     @Override
     public byte getBitsInLastByteCompFile(byte[] compFileArr) {
-        return compFileArr[compFileIterator++];
+        int compFileIterator=4; //4th byte
+        return compFileArr[compFileIterator];
     }
 
     // Getting header information
     @Override
     public byte[] getHeader(byte[] compFileArr, int headerSize) {
-
+        int compFileIterator=5; //5th to 5+headersize
         byte[] header = new byte[headerSize];
         for (int i = 0; i < headerSize; i++) {
             header[i] = compFileArr[compFileIterator++];
@@ -103,9 +103,9 @@ public class HuffmanDecompressorAlgoImpl implements IHuffmanDecompressorAlgo {
     }
 
     // function to handle last byte of compressed file
-    private void handleLastByteOfCompFile(FileOutputStream DecompFile, Node root, Node currNode, byte[] compArr,
-            byte bitsInLastByteComp) throws IOException {
+    private void handleLastByteOfCompFile(FileOutputStream DecompFile, Node root, Node currNode, byte[] compArr, byte bitsInLastByteComp, int compFileIterator) throws IOException {
         // converting byte to binary string so that we can read each bit of current byte
+        
         String tempStr = String.format("%8s", Integer.toBinaryString(compArr[compFileIterator] & 0xFF)).replace(' ',
                 '0');
 
@@ -131,8 +131,9 @@ public class HuffmanDecompressorAlgoImpl implements IHuffmanDecompressorAlgo {
     @Override
     // Function to convert encoding to char and write them in decompressed file
     public void getCharFromTreeWriteInDecompFile(FileOutputStream decompFileWriter, Node root, byte[] compArr,
-            byte bitsInLastByteComp) throws IOException {
-        if (root == null)
+        byte bitsInLastByteComp,int headerSize) throws IOException {
+        int compFileIterator=headerSize+5; //compArr[0-4] bytes for headersize(int), compArr[4]:1 byte for bitsInlastByteofComp(byte), headerSize number of bytes for headersize
+        if (root == null) 
             return;
 
         logger.log(Level.INFO, "Generating Decompressed file....");
@@ -154,17 +155,15 @@ public class HuffmanDecompressorAlgoImpl implements IHuffmanDecompressorAlgo {
                 else {
                     currNode = currNode.left;
                 }
-                // if encountering a leaf node of huffman tree writing character pf node to
-                // decompressed file
+                // if encountering a leaf node of huffman tree writing character pf node to decompressed file
                 if (currNode.left == null && currNode.right == null) {
                     decompFileWriter.write(currNode.ch);
                     currNode = root;
                 }
             }
         }
-        // Handling last byte - (As Last byte of compressed file have only
-        // (bitsInLastByteComp) relevant bits)
-        handleLastByteOfCompFile(decompFileWriter, root, currNode, compArr, bitsInLastByteComp);
+        // Handling last byte - (As Last byte of compressed file have only (bitsInLastByteComp) relevant bits)
+        handleLastByteOfCompFile(decompFileWriter, root, currNode, compArr, bitsInLastByteComp, compFileIterator);
     }
 
     // Function to check whether two files of given path are equal or not

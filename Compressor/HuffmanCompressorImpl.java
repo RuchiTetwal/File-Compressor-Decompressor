@@ -5,7 +5,7 @@ import java.io.*;
 
 import static java.lang.System.*;
 
-public class HuffmanCompressorImpl implements Icompressor {
+public class HuffmanCompressorImpl implements ICompressor {
 
     public void compress(String orgFileName, String compFileName) throws IOException {
 

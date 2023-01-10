@@ -7,7 +7,7 @@ public class HuffmanZipperImpl implements IFileZipper{
 
     @Override
     public void compress(String originalFileName, String compFileName) throws IOException{
-        Icompressor compObj = new HuffmanCompressorImpl();
+        ICompressor compObj = new HuffmanCompressorImpl();
         compObj.compress(originalFileName, compFileName);       
     }
 
