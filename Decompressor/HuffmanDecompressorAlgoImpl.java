@@ -111,7 +111,7 @@ public class HuffmanDecompressorAlgoImpl implements IHuffmanDecompressorAlgo {
     }
 
     // function to handle last byte of compressed file
-    private void handleLastByteOfCompFile(FileOutputStream decompFileWriter, Node root, Node currNode, byte[] compArr, byte bitsInLastByteComp, int compFileIterator, byte[] decompFileList, int decompFileIterator) throws IOException {
+    private byte[] handleLastByteOfCompFile(Node root, Node currNode, byte[] compArr, byte bitsInLastByteComp, int compFileIterator, byte[] decompFileList, int decompFileIterator) throws IOException {
         // converting byte to binary string so that we can read each bit of current byte
         
         String tempStr = String.format("%8s", Integer.toBinaryString(compArr[compFileIterator] & 0xFF)).replace(' ',
@@ -135,8 +135,8 @@ public class HuffmanDecompressorAlgoImpl implements IHuffmanDecompressorAlgo {
             }
         }
 
-   
-        decompFileWriter.write(decompFileList);
+        return decompFileList;
+
     }
 
     @Override
@@ -178,8 +178,10 @@ public class HuffmanDecompressorAlgoImpl implements IHuffmanDecompressorAlgo {
             }
         }
         
-        // Handling last byte - (As Last byte of compressed file have only (bitsInLastByteComp) relevant bits)
-        handleLastByteOfCompFile(decompFileWriter, root, currNode, compArr, bitsInLastByteComp, compFileIterator, decompFileList, decompFileIterator);
+         // Handling last byte - (As Last byte of compressed file have only (bitsInLastByteComp) relevant bits)
+        byte [] newDecompFileList = handleLastByteOfCompFile(root, currNode, compArr, bitsInLastByteComp, compFileIterator, decompFileList, decompFileIterator);
+   
+        decompFileWriter.write(newDecompFileList);
     }
 
     // Function to check whether two files of given path are equal or not
