@@ -64,12 +64,15 @@ public class HuffmanEncodeOrgFileImpl implements IHuffmanEncodeOrgFile {
 
             int headerSize = header.length;
             byte[] headerSizeBytes = intToBytes(headerSize);
+            byte[] orgFileSizeBytes =intToBytes(orgFileList.length);
             byte[] compByte = getCompByteArr(orgFileList, huffmanMap);
 
             // Writing Byte size of header information in compressed file
             compWriter.write(headerSizeBytes);      
             // Writing Number of relevant bits in Last byte of compressed file
             compWriter.write(bitsInLastByteComp);
+            // Writing Original file size in bits
+            compWriter.write(orgFileSizeBytes);
             // Writing header information to compressed file
             compWriter.write(header);
             // Writing encoded data to compressed file

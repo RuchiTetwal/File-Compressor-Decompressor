@@ -32,14 +32,24 @@ public class HuffmanDecompressorAlgoImpl implements IHuffmanDecompressorAlgo {
     // Getting number of relevant bits in last byte of compressed file
     @Override
     public byte getBitsInLastByteCompFile(byte[] compFileArr) {
-        int compFileIterator=4; //4th byte
-        return compFileArr[compFileIterator];
+        //4th byte
+        return compFileArr[4];
+    }
+
+    @Override
+    public int getOrgFileSize(byte[] compFileArr){
+        int compFileIterator=5; //5-8 bytes 
+        byte[] orgFileSizeBytes = new byte[4];
+        for (int i = 0; i < 4; i++) {
+            orgFileSizeBytes[i] = compFileArr[compFileIterator++];
+        }
+        return bytesToInt(orgFileSizeBytes);
     }
 
     // Getting header information
     @Override
     public byte[] getHeader(byte[] compFileArr, int headerSize) {
-        int compFileIterator=5; //5th to 5+headersize
+        int compFileIterator=9; //9th to 9+headersize
         byte[] header = new byte[headerSize];
         for (int i = 0; i < headerSize; i++) {
             header[i] = compFileArr[compFileIterator++];
@@ -71,9 +81,7 @@ public class HuffmanDecompressorAlgoImpl implements IHuffmanDecompressorAlgo {
             // if current bit is 1 reading next 8 bits and extracting char from them
             if (headerStr.charAt(i) == '1') {
                 i++;
-                String binaryChar = headerStr.substring(i, i + 8);
-
-                newNode.ch = (char) (Integer.parseInt(binaryChar, 2));
+                newNode.ch = (char) (Integer.parseInt(headerStr.substring(i, i + 8), 2));
                 newNode.left = null;
                 newNode.right = null;
 
@@ -103,7 +111,7 @@ public class HuffmanDecompressorAlgoImpl implements IHuffmanDecompressorAlgo {
     }
 
     // function to handle last byte of compressed file
-    private void handleLastByteOfCompFile(FileOutputStream DecompFile, Node root, Node currNode, byte[] compArr, byte bitsInLastByteComp, int compFileIterator) throws IOException {
+    private void handleLastByteOfCompFile(FileOutputStream decompFileWriter, Node root, Node currNode, byte[] compArr, byte bitsInLastByteComp, int compFileIterator, byte[] decompFileList, int decompFileIterator) throws IOException {
         // converting byte to binary string so that we can read each bit of current byte
         
         String tempStr = String.format("%8s", Integer.toBinaryString(compArr[compFileIterator] & 0xFF)).replace(' ',
@@ -122,23 +130,30 @@ public class HuffmanDecompressorAlgoImpl implements IHuffmanDecompressorAlgo {
             // if encountering a leaf node of huffman tree writing character of node to
             // decompressed file
             if (currNode.left == null && currNode.right == null) {
-                DecompFile.write(currNode.ch);
+                decompFileList[decompFileIterator]=(byte)(currNode.ch);
                 currNode = root;
             }
         }
+
+   
+        decompFileWriter.write(decompFileList);
     }
 
     @Override
     // Function to convert encoding to char and write them in decompressed file
     public void getCharFromTreeWriteInDecompFile(FileOutputStream decompFileWriter, Node root, byte[] compArr,
         byte bitsInLastByteComp,int headerSize) throws IOException {
-        int compFileIterator=headerSize+5; //compArr[0-4] bytes for headersize(int), compArr[4]:1 byte for bitsInlastByteofComp(byte), headerSize number of bytes for headersize
+        int compFileIterator=headerSize+9; //compArr[0-4] bytes for headersize(int), compArr[4]:1 byte for bitsInlastByteofComp(byte), headerSize number of bytes for headersize
         if (root == null) 
             return;
 
         logger.log(Level.INFO, "Generating Decompressed file....");
 
         Node currNode = root;
+
+        byte[] decompFileList = new byte[getOrgFileSize(compArr)];
+
+        int decompFileIterator=0;
 
         // Reading bytes of compressed data except last byte
         for (; compFileIterator < compArr.length - 1; compFileIterator++) {
@@ -155,15 +170,16 @@ public class HuffmanDecompressorAlgoImpl implements IHuffmanDecompressorAlgo {
                 else {
                     currNode = currNode.left;
                 }
-                // if encountering a leaf node of huffman tree writing character pf node to decompressed file
+                // if encountering a leaf node of huffman tree writing character of node to decompressed file
                 if (currNode.left == null && currNode.right == null) {
-                    decompFileWriter.write(currNode.ch);
+                    decompFileList[decompFileIterator++]=(byte)currNode.ch;
                     currNode = root;
                 }
             }
         }
+        
         // Handling last byte - (As Last byte of compressed file have only (bitsInLastByteComp) relevant bits)
-        handleLastByteOfCompFile(decompFileWriter, root, currNode, compArr, bitsInLastByteComp, compFileIterator);
+        handleLastByteOfCompFile(decompFileWriter, root, currNode, compArr, bitsInLastByteComp, compFileIterator, decompFileList, decompFileIterator);
     }
 
     // Function to check whether two files of given path are equal or not
@@ -188,8 +204,8 @@ public class HuffmanDecompressorAlgoImpl implements IHuffmanDecompressorAlgo {
     public void compareOrgDecompFiles(String orgFileName, String decompFileName) {
         // checking if decompressed file and original files are same or not
         String userDirectory = System.getProperty("user.dir");
-        File orgFile = new File(userDirectory + "/" + orgFileName);
-        File decompFile = new File(userDirectory + "/" + decompFileName);
+        File orgFile = new File(userDirectory + '/' + orgFileName);
+        File decompFile = new File(userDirectory + '/' + decompFileName);
 
         boolean equal = areFilesEqual(orgFile.toPath(), decompFile.toPath());
         if (equal) {

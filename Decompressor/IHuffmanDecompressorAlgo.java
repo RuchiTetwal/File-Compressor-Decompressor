@@ -9,6 +9,9 @@ public interface IHuffmanDecompressorAlgo {
     //Function to get number of relevant bits in last byte of compressed file
     public byte getBitsInLastByteCompFile(byte[] compFileArr);
 
+    //Function to get original file size in number of bytes
+    public int getOrgFileSize(byte[] compFileArr);
+
     //Function to get header information
     public byte[] getHeader(byte[] compFileArr, int headerSize);
  
