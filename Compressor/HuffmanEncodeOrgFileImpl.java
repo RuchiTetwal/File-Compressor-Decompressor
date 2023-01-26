@@ -5,7 +5,6 @@ import java.io.*;
 
 public class HuffmanEncodeOrgFileImpl implements IHuffmanEncodeOrgFile {
 
-    // function to convert int to byte array
     private byte[] intToBytes(int val) {
         byte[] ans = new byte[4];
         ans[0] = (byte) (val >> 24);
@@ -20,22 +19,20 @@ public class HuffmanEncodeOrgFileImpl implements IHuffmanEncodeOrgFile {
     private byte[] getCompByteArr(byte[] orgFileList, Map<Byte, String> huffmanMap){
         StringBuilder strOrgFile = new StringBuilder();
 
-        for (byte currChar : orgFileList) {
-            strOrgFile.append(huffmanMap.get(currChar));
+        for (int i=0;i<orgFileList.length;i++) {
+            strOrgFile.append(huffmanMap.get(orgFileList[i]));
         }
 
         byte[] compByte = new byte[(int) Math.ceil(strOrgFile.length() / 8.0)];
 
-        String temp = "";
+        StringBuilder temp = new StringBuilder();
         int j = 0;
 
         for (int i = 0; i < strOrgFile.length(); i++) {
-            temp += (strOrgFile.charAt(i));
+            temp.append(strOrgFile.charAt(i));
             if (temp.length() == 8) {
-                int a = Integer.parseInt(temp, 2);
-                byte b = (byte) a;
-                compByte[j++] = b;
-                temp = "";
+                compByte[j++] = (byte)Integer.parseInt(temp.toString(), 2);
+                temp.setLength(0);;
             }
         }
 
@@ -43,20 +40,16 @@ public class HuffmanEncodeOrgFileImpl implements IHuffmanEncodeOrgFile {
             int n = temp.length();
             bitsInLastByteComp = (byte) n;
             for (int i = 0; i < (8 - n); i++) {
-                temp += '0';
+                temp.append('0');
             }
-            int a = Integer.parseInt(temp, 2);
-            byte b = (byte) a;
-            compByte[j] = b;
+            compByte[j] = (byte) Integer.parseInt(temp.toString(), 2);
         }
 
         return compByte;
     }
 
-
     @Override
-    // function for generating encoding of given file and writing encoded data to
-    // new compressed file
+    // function for generating encoding of given file and writing encoded data to new compressed file
     public void encodeOrgFile(byte[] orgFileList, String CompressedTextFile, Map<Byte, String> huffmanMap,
             byte[] header) throws IOException {
        

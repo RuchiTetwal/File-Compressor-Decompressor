@@ -10,53 +10,6 @@ public class HuffmanDecompressorAlgoImpl implements IHuffmanDecompressorAlgo {
 
     Logger logger = Logger.getLogger(HuffmanDecompressorAlgoImpl.class.getName());
 
-    // function to convert byte array to int
-    private int bytesToInt(byte[] bytes) {
-        int ans = 0;
-        for (byte by : bytes) {
-            ans = (ans << 8) + (by & 0xFF);
-        }
-        return ans;
-    }
-
-    @Override
-    public int getHeaderSize(byte[] compFileArr) {
-        int compFileIterator=0; //0-3 bytes 
-        byte[] headerSizeBytes = new byte[4];
-        for (int i = 0; i < 4; i++) {
-            headerSizeBytes[i] = compFileArr[compFileIterator++];
-        }
-        return bytesToInt(headerSizeBytes);
-    }
-
-    // Getting number of relevant bits in last byte of compressed file
-    @Override
-    public byte getBitsInLastByteCompFile(byte[] compFileArr) {
-        //4th byte
-        return compFileArr[4];
-    }
-
-    @Override
-    public int getOrgFileSize(byte[] compFileArr){
-        int compFileIterator=5; //5-8 bytes 
-        byte[] orgFileSizeBytes = new byte[4];
-        for (int i = 0; i < 4; i++) {
-            orgFileSizeBytes[i] = compFileArr[compFileIterator++];
-        }
-        return bytesToInt(orgFileSizeBytes);
-    }
-
-    // Getting header information
-    @Override
-    public byte[] getHeader(byte[] compFileArr, int headerSize) {
-        int compFileIterator=9; //9th to 9+headersize
-        byte[] header = new byte[headerSize];
-        for (int i = 0; i < headerSize; i++) {
-            header[i] = compFileArr[compFileIterator++];
-        }
-        return header;
-    }
-
     @Override
     // function to generate huffman tree from header of compressed file
     public Node generateHuffmanTree(byte[] header, int headerSize) {
@@ -70,8 +23,7 @@ public class HuffmanDecompressorAlgoImpl implements IHuffmanDecompressorAlgo {
         StringBuilder headerStr = new StringBuilder();
 
         for (; i < header.length; i++) {
-            String byteStr = String.format("%8s", Integer.toBinaryString(header[i] & 0xFF)).replace(' ', '0');
-            headerStr.append(byteStr);
+            headerStr.append(Integer.toBinaryString((header[i] & 0xFF) + 0x100).substring(1));
         }
 
         i = 0;
@@ -87,8 +39,7 @@ public class HuffmanDecompressorAlgoImpl implements IHuffmanDecompressorAlgo {
 
                 i += 8;
             } else {
-                // else if current bit is 0 and stack have only one node then entire tree is
-                // constructed
+                // else if current bit is 0 and stack have only one node then entire tree is constructed
                 if (stack.size() == 1) {
                     root = stack.peek();
                     break;
@@ -110,12 +61,9 @@ public class HuffmanDecompressorAlgoImpl implements IHuffmanDecompressorAlgo {
         return root;
     }
 
-    // function to handle last byte of compressed file
     private byte[] handleLastByteOfCompFile(Node root, Node currNode, byte[] compArr, byte bitsInLastByteComp, int compFileIterator, byte[] decompFileList, int decompFileIterator) throws IOException {
         // converting byte to binary string so that we can read each bit of current byte
-        
-        String tempStr = String.format("%8s", Integer.toBinaryString(compArr[compFileIterator] & 0xFF)).replace(' ',
-                '0');
+        String tempStr = Integer.toBinaryString((compArr[compFileIterator] & 0xFF) + 0x100).substring(1);
 
         // reading byte bit-by-bit
         for (byte i = 0; i < bitsInLastByteComp; i++) {
@@ -127,8 +75,7 @@ public class HuffmanDecompressorAlgoImpl implements IHuffmanDecompressorAlgo {
             else {
                 currNode = currNode.left;
             }
-            // if encountering a leaf node of huffman tree writing character of node to
-            // decompressed file
+            // if encountering a leaf node of huffman tree writing character of node to decompressed file
             if (currNode.left == null && currNode.right == null) {
                 decompFileList[decompFileIterator]=(byte)(currNode.ch);
                 currNode = root;
@@ -136,14 +83,12 @@ public class HuffmanDecompressorAlgoImpl implements IHuffmanDecompressorAlgo {
         }
 
         return decompFileList;
-
     }
 
     @Override
     // Function to convert encoding to char and write them in decompressed file
-    public void getCharFromTreeWriteInDecompFile(FileOutputStream decompFileWriter, Node root, byte[] compArr,
-        byte bitsInLastByteComp,int headerSize) throws IOException {
-        int compFileIterator=headerSize+9; //compArr[0-4] bytes for headersize(int), compArr[4]:1 byte for bitsInlastByteofComp(byte), headerSize number of bytes for headersize
+    public void getCharFromTreeWriteInDecompFile(FileOutputStream decompFileWriter, Node root, byte[] compArr, byte bitsInLastByteComp, int headerSize, int orgFileSize) throws IOException {
+        int compFileIterator=0, decompFileIterator=0;
         if (root == null) 
             return;
 
@@ -151,16 +96,13 @@ public class HuffmanDecompressorAlgoImpl implements IHuffmanDecompressorAlgo {
 
         Node currNode = root;
 
-        byte[] decompFileList = new byte[getOrgFileSize(compArr)];
-
-        int decompFileIterator=0;
+        byte[] decompFileList = new byte[orgFileSize];
 
         // Reading bytes of compressed data except last byte
         for (; compFileIterator < compArr.length - 1; compFileIterator++) {
             // converting byte to binary string so that we can read each bit of current byte
-            String tempStr = String.format("%8s", Integer.toBinaryString(compArr[compFileIterator] & 0xFF)).replace(' ',
-                    '0');
-            // reading byte bit-by-bit
+            String tempStr = Integer.toBinaryString((compArr[compFileIterator] & 0xFF) + 0x100).substring(1);
+            // reading bytes bit-by-bit
             for (int i = 0; i < 8; i++) {
                 // if current bit is 1 moving to right child of current node
                 if (tempStr.charAt(i) == '1') {
@@ -218,3 +160,4 @@ public class HuffmanDecompressorAlgoImpl implements IHuffmanDecompressorAlgo {
     }
 
 }
+

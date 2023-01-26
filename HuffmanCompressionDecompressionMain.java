@@ -22,3 +22,8 @@ public class HuffmanCompressionDecompressionMain {
 
     }
 }
+class Node {
+    char ch;
+    Node left;
+    Node right;
+}

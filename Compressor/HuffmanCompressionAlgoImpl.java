@@ -10,11 +10,11 @@ public class HuffmanCompressionAlgoImpl implements IHuffmanCompressionAlgo {
         HashMap<Byte, Integer> freqMap = new HashMap<>();
 
         // storing frequency of each char in hashmap
-        for (byte currChar : orgFileList) {
-            if (freqMap.containsKey(currChar)) {
-                freqMap.put(currChar, freqMap.get(currChar) + 1);
+        for (int i=0;i<orgFileList.length; i++) {
+            if (freqMap.containsKey(orgFileList[i])) {
+                freqMap.put(orgFileList[i], freqMap.get(orgFileList[i]) + 1);
             } else {
-                freqMap.put(currChar, 1);
+                freqMap.put(orgFileList[i], 1);
             }
         }
         return freqMap;
@@ -25,12 +25,10 @@ public class HuffmanCompressionAlgoImpl implements IHuffmanCompressionAlgo {
         PriorityQueue<HuffmanNode> minHeap = new PriorityQueue<>(freqMap.size(), new Comp());
 
         for (Map.Entry<Byte, Integer> element : freqMap.entrySet()) {
-            Byte ch = element.getKey();
-            int chFreq = element.getValue();
             // creating a Huffman node object and adding it to the priority queue
             HuffmanNode node = new HuffmanNode();
-            node.ch = ch;
-            node.freq = chFreq;
+            node.ch = element.getKey();
+            node.freq = element.getValue();
             node.left = null;
             node.right = null;
             // adding node to queue
@@ -41,11 +39,12 @@ public class HuffmanCompressionAlgoImpl implements IHuffmanCompressionAlgo {
 
     @Override
     public HuffmanNode generateTree(PriorityQueue<HuffmanNode> minHeap) {
-        HuffmanNode root = null;
+        HuffmanNode root = null, min1, min2;
+
         while (minHeap.size() > 1) {
-            HuffmanNode min1 = minHeap.peek();
+            min1 = minHeap.peek();
             minHeap.poll();
-            HuffmanNode min2 = minHeap.peek();
+            min2 = minHeap.peek();
             minHeap.poll();
 
             HuffmanNode newNode = new HuffmanNode();
@@ -92,10 +91,13 @@ public class HuffmanCompressionAlgoImpl implements IHuffmanCompressionAlgo {
         generatePostOrder(root.left, postOrderString);
         generatePostOrder(root.right, postOrderString);
 
+        String temp;
+        int n;
+
         if (root.left == null && root.right == null) {
             postOrderString.append('1');
-            String temp = Integer.toBinaryString(root.ch & 0xFF);
-            int n = temp.length();
+            temp = Integer.toBinaryString(root.ch & 0xFF);
+            n = temp.length();
 
             for (int i = n; i < 8; i++) {
                 temp = '0' + temp;
@@ -122,27 +124,25 @@ public class HuffmanCompressionAlgoImpl implements IHuffmanCompressionAlgo {
         StringBuilder temp = new StringBuilder();
 
         int j = 0;
+        int n;
+        String str;
 
         for (int i = 0; i < postOrderStr.length(); i++) {
             temp.append(postOrderStr.charAt(i));
             if (temp.length() == 8) {
-                String str = temp.toString();
-                int a = Integer.parseInt(str, 2);
-                byte b = (byte) a;
-                header[j++] = b;
+                str = temp.toString();
+                header[j++] = (byte) Integer.parseInt(str, 2);
                 temp.setLength(0);
             }
         }
 
         if (temp.length() != 0) {
-            int n = temp.length();
+            n = temp.length();
             for (int i = 0; i < (8 - n); i++) {
                 temp.append('0');
             }
-            String str = temp.toString();
-            int a = Integer.parseInt(str, 2);
-            byte b = (byte) a;
-            header[j] = b;
+            str = temp.toString();
+            header[j] = (byte) Integer.parseInt(str, 2);
         }
         return header;
     }
