@@ -81,7 +81,6 @@ public class HuffmanCompressionAlgoImpl implements IHuffmanCompressionAlgo {
         generateCode(root, "", huffmanMap);
         return huffmanMap;
     }
-    
 
     // Postorder traversal of huffman tree for generating header information
     private StringBuilder generatePostOrder(HuffmanNode root, StringBuilder postOrderString) {
@@ -109,8 +108,7 @@ public class HuffmanCompressionAlgoImpl implements IHuffmanCompressionAlgo {
         return postOrderString;
     }
 
-    // function for generating header information using postorder traversal of
-    // huffman encoding tree
+    // function for generating header information using postorder traversal of huffman encoding tree
     private byte[] generateHeader(HuffmanNode root) {
 
         StringBuilder postOrderString = new StringBuilder();

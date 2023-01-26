@@ -32,7 +32,7 @@ public class HuffmanEncodeOrgFileImpl implements IHuffmanEncodeOrgFile {
             temp.append(strOrgFile.charAt(i));
             if (temp.length() == 8) {
                 compByte[j++] = (byte)Integer.parseInt(temp.toString(), 2);
-                temp.setLength(0);;
+                temp.setLength(0);
             }
         }
 
@@ -44,22 +44,19 @@ public class HuffmanEncodeOrgFileImpl implements IHuffmanEncodeOrgFile {
             }
             compByte[j] = (byte) Integer.parseInt(temp.toString(), 2);
         }
-
         return compByte;
     }
 
     @Override
     // function for generating encoding of given file and writing encoded data to new compressed file
-    public void encodeOrgFile(byte[] orgFileList, String CompressedTextFile, Map<Byte, String> huffmanMap,
-            byte[] header) throws IOException {
-       
-        try (FileOutputStream compWriter = new FileOutputStream(CompressedTextFile)) {
+    public void encodeOrgFile(byte[] orgFileList, String compressedTextFile, Map<Byte, String> huffmanMap, byte[] header) throws IOException {      
+        try (FileOutputStream compWriter = new FileOutputStream(compressedTextFile)) {
 
             int headerSize = header.length;
             byte[] headerSizeBytes = intToBytes(headerSize);
             byte[] orgFileSizeBytes =intToBytes(orgFileList.length);
             byte[] compByte = getCompByteArr(orgFileList, huffmanMap);
-
+          
             // Writing Byte size of header information in compressed file
             compWriter.write(headerSizeBytes);      
             // Writing Number of relevant bits in Last byte of compressed file
