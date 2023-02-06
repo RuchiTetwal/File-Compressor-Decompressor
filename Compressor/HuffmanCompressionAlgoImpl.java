@@ -1,4 +1,4 @@
-package compressor;
+package Compressor;
 
 import java.io.*;
 import java.util.*;

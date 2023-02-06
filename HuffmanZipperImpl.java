@@ -1,12 +1,12 @@
 import java.io.*;
 import java.util.logging.*;
 
-import compressor.*;
-import decompressor.*;
+import Compressor.*;
+import Decompressor.*;
 
 public class HuffmanZipperImpl implements IFileZipper{
 
-    Logger logger = Logger.getLogger(HuffmanDecompressorAlgoImpl.class.getName());
+    Logger logger = Logger.getLogger(HuffmanZipperImpl.class.getName());
 
     @Override
     public void compress(String originalFileName, String compFileName) throws IOException{
@@ -21,9 +21,9 @@ public class HuffmanZipperImpl implements IFileZipper{
 
     @Override
     public void decompress(String compFileName,String originalFileName, String decompFileName) throws IOException{
-        IDecompressor decompObj = new HuffmanDecompressorImpl();
+        IDecompressor decompressorObj = new HuffmanDecompressorImpl();
         long startTimeD= System.currentTimeMillis();
-        decompObj.decompress(compFileName,originalFileName, decompFileName);
+        decompressorObj.decompress(compFileName,originalFileName, decompFileName);
         long endTimeD= System.currentTimeMillis();
         String msg= String.format("Decompression time : %d",(endTimeD-startTimeD));
         logger.log(Level.INFO, msg );

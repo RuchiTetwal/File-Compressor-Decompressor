@@ -1,4 +1,4 @@
-package decompressor;
+package Decompressor;
 
 import java.util.*;
 import java.io.*;

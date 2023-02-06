@@ -1,4 +1,4 @@
-package compressor;
+package Compressor;
 
 import java.io.IOException;
 import java.util.Map;
